@@ -1,0 +1,468 @@
+# Jenkins – Beginner Guide
+
+## 1. What is Jenkins?
+
+Jenkins is an open-source automation server mainly used for **CI/CD**.
+
+**CI (Continuous Integration):** Automatically build and test code whenever developers push changes.
+
+**CD (Continuous Delivery/Deployment):** Automatically package and deploy the application after it passes the required checks.
+
+### Basic workflow
+
+```text
+Developer
+   ↓
+GitHub
+   ↓
+Jenkins
+   ↓
+Build → Test → Deploy
+```
+
+---
+
+## 2. Important Jenkins Terms
+
+### Job
+
+A task that Jenkins performs.
+
+### Build
+
+One execution of a Jenkins job.
+
+### Pipeline
+
+A sequence of automated steps.
+
+```text
+Build → Test → Deploy
+```
+
+### Stage
+
+One section of a pipeline.
+
+```text
+Pipeline
+├── Build
+├── Test
+└── Deploy
+```
+
+### Agent
+
+The machine where Jenkins executes the commands.
+
+### Jenkinsfile
+
+A file containing the instructions for a Jenkins Pipeline.
+
+### Plugin
+
+Adds extra functionality to Jenkins, such as GitHub, Docker, Maven, etc.
+
+---
+
+# 3. Installing Jenkins with Docker
+
+If Docker is installed, run:
+
+```bash
+docker run -d \
+  --name jenkins \
+  -p 8080:8080 \
+  -p 50000:50000 \
+  jenkins/jenkins:lts
+```
+
+Open Jenkins in your browser:
+
+```text
+http://localhost:8080
+```
+
+Get the initial password:
+
+```bash
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+Enter the password and choose:
+
+```text
+Install suggested plugins
+```
+
+Then create your Jenkins administrator account.
+
+---
+
+# 4. Your First Jenkins Job
+
+Go to:
+
+```text
+Jenkins Dashboard
+→ New Item
+→ Enter name
+→ Freestyle project
+→ OK
+```
+
+Go to:
+
+```text
+Build Steps
+→ Add build step
+→ Execute shell
+```
+
+Enter:
+
+```bash
+echo "Hello Jenkins!"
+```
+
+Save and click:
+
+```text
+Build Now
+```
+
+Open:
+
+```text
+Build #1
+→ Console Output
+```
+
+You should see:
+
+```text
+Hello Jenkins!
+Finished: SUCCESS
+```
+
+---
+
+# 5. Jenkins Pipeline
+
+For real projects, **Pipeline** is more useful than a basic Freestyle project.
+
+Create:
+
+```text
+New Item
+→ Pipeline
+```
+
+A simple pipeline:
+
+```groovy
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Build') {
+            steps {
+                echo 'Building application'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application'
+            }
+        }
+    }
+}
+```
+
+This creates:
+
+```text
+Build
+  ↓
+Test
+  ↓
+Deploy
+```
+
+---
+
+# 6. Jenkinsfile
+
+Instead of writing the pipeline directly inside Jenkins, we normally store it in the GitHub repository as:
+
+```text
+Jenkinsfile
+```
+
+Example project:
+
+```text
+my-project/
+├── src/
+├── README.md
+└── Jenkinsfile
+```
+
+Example Jenkinsfile:
+
+```groovy
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Build') {
+            steps {
+                echo 'Building...'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
+            }
+        }
+    }
+}
+```
+
+This is called **Pipeline as Code**.
+
+---
+
+# 7. Jenkins + GitHub
+
+The normal CI workflow is:
+
+```text
+Developer
+    ↓
+git push
+    ↓
+GitHub
+    ↓
+Jenkins
+    ↓
+Checkout code
+    ↓
+Build
+    ↓
+Test
+    ↓
+Deploy
+```
+
+Jenkins needs access to the GitHub repository.
+
+For a public repository, this is simple.
+
+For a private repository, Jenkins needs credentials such as:
+
+* Personal Access Token
+* SSH key
+
+Credentials should be stored in:
+
+```text
+Manage Jenkins
+→ Credentials
+```
+
+Never put passwords or tokens directly inside a Jenkinsfile.
+
+---
+
+# 8. Webhooks
+
+A **webhook** allows GitHub to notify Jenkins whenever code is pushed.
+
+Without a webhook:
+
+```text
+Developer
+   ↓
+git push
+   ↓
+GitHub
+
+Manually click:
+Build Now
+```
+
+With a webhook:
+
+```text
+Developer
+   ↓
+git push
+   ↓
+GitHub
+   ↓
+Webhook
+   ↓
+Jenkins automatically starts
+```
+
+This is what makes CI truly automatic.
+
+---
+
+# 9. Jenkins + Docker
+
+Jenkins can also build Docker images.
+
+Example:
+
+```groovy
+stage('Docker Build') {
+    steps {
+        sh 'docker build -t my-app .'
+    }
+}
+```
+
+The workflow becomes:
+
+```text
+GitHub
+   ↓
+Jenkins
+   ↓
+Build
+   ↓
+Test
+   ↓
+Docker Build
+   ↓
+Deploy
+```
+
+---
+
+# 10. Debugging Jenkins
+
+If a build fails:
+
+```text
+Failed Build
+    ↓
+Console Output
+    ↓
+Find ERROR
+    ↓
+Check the failed command
+```
+
+For example:
+
+```text
+mvn: command not found
+```
+
+means Maven is not available to Jenkins.
+
+Other common problems:
+
+* Git not installed
+* Wrong Java version
+* Missing dependencies
+* Incorrect credentials
+* Permission problems
+* Incorrect file paths
+
+---
+
+# 11. Useful Jenkins Commands
+
+### Start Jenkins
+
+```bash
+docker start jenkins
+```
+
+### Stop Jenkins
+
+```bash
+docker stop jenkins
+```
+
+### View logs
+
+```bash
+docker logs jenkins
+```
+
+### Check running containers
+
+```bash
+docker ps
+```
+
+### Jenkins dashboard
+
+```text
+http://localhost:8080
+```
+
+---
+
+# 12. What You Should Learn First
+
+As a beginner, learn Jenkins in this order:
+
+```text
+1. Install Jenkins
+        ↓
+2. Create a Job
+        ↓
+3. Run a Build
+        ↓
+4. Understand Pipelines
+        ↓
+5. Write a Jenkinsfile
+        ↓
+6. Connect GitHub
+        ↓
+7. Add Webhooks
+        ↓
+8. Add Docker
+        ↓
+9. Deploy
+```
+
+### The main idea to remember:
+
+```text
+GitHub
+   ↓
+Jenkins
+   ↓
+Build
+   ↓
+Test
+   ↓
+Deploy
+```
+
+**Jenkins automates this entire process.**
