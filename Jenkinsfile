@@ -11,8 +11,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'master',
-                    url: 'git@github.com:codefeeding99/Testing-and-Builing-using-pipe-line.git',
-                    credentialsId: 'pipeline key'
+                    url: 'git@github.com:24wh1a0550/jenkins.git',
+                    credentialsId: 'admin'
             }
         }
 
